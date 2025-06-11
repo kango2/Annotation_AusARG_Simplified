@@ -44,6 +44,14 @@ export P2_DEPENDENCY_FOR_3="PBS_JOBID"                              # OPTIONAL, 
 ## ^ P2_DEPENDENCY_FOR_3 is usually set to the job ID of script2 in P1 (if you are running P1 at the same time)
 
 
+# Things to note
+## script1 now runs minimap2 in parallel, 12 concurrent jobs at any time each using 1 thread, each job have peak RSS that varies from 10GB to 15GB, we request 190GB for the job which should be enough at any one time, but if you notice any memory problem in the PBS log, then simply decrease the ncpus to 6 or 8 and this should fix the problem.
+## script1 requests 16hr walltime which should be enough even if you have hundreds of RNA samples (22 samples took ~30mins to run). But you can increase this to be safe if you have massive amount of RNA samples.
+
+
+
+
+
 
 
 
@@ -74,6 +82,7 @@ else
     echo -e "${current_time}\n\n[LOG] Nothing set to 'YES'. Now exiting...\n${messages[$random_index]}"
     exit 0
 fi
+
 ## Checking if only 1 pipeline is selected
 selected_pipelines=0
 [ "$P1" = "YES" ] && selected_pipelines=$((selected_pipelines+1))
@@ -105,39 +114,32 @@ elif [ "$email_notification" = "NO" ]; then
     sed -i "6s|.*||" ${repository_path}/scripts/2TrainingAugustus.sh
     sed -i "6s|.*||" ${repository_path}/scripts/3RunningAugustus.sh
 fi
-#creating working directory and subdirectories if they don't already exist
-mkdir -p ${workingdir}
-mkdir -p ${workingdir}/log
-mkdir -p ${workingdir}/log/launch
 
 
+
+#launching pipeline
 if [ "$P1" = "YES" ]; then
     echo -e "[LOG] \$P1 set to: YES, now launching P1"
-    P1_1 variables ${repository_path} ${workingdir} ${TRANSLATION_OUTPUT} ${genome} 
-
-    P1_2 variables ${species} ${workingdir} ${genome} 
-
-    P1_3 variables ${species} ${workingdir} ${genome} ${AUGUSTUS_CONFIG} ${CUSTOM_EXTRINSIC} ${uniprot_sprot} ${uniprot_trembl}
-
-    export P1_1_JOBID=$(qsub -P ${PROJECT} -o ${workingdir}/log/PBS/P1_1GenerateTrainingGene.OU -v repository_path=${repository_path},workingdir=${P1_workingdir},TRANSLATION_OUTPUT=${P1_TRANSLATION_OUTPUT},genome=${P1_GENOME} ${repository_path}/scripts/1GenerateTrainingGene.sh)
-    export P1_2_JOBID=$(qsub -P ${PROJECT} -W depend=afterok:${P1_1_JOBID} -o ${workingdir}/log/PBS/P1_2TrainingAugustus.OU -v species=${P1_species},workingdir=${P1_workingdir},genome=${P1_GENOME} ${repository_path}/scripts/2TrainingAugustus.sh)
-    qsub -P ${PROJECT} -W depend=afterok:${P1_2_JOBID} -o ${workingdir}/log/PBS/P1_3RunningAugustus.OU -v species=${P1_species},workingdir=${P1_workingdir},genome=${P1_GENOME},AUGUSTUS_CONFIG=${P1_workingdir}/Augustus/config,CUSTOM_EXTRINSIC=${repository_path}/extrinsic.MPE_modded.cfg,uniprot_sprot=${uniprot_sprot},uniprot_trembl=${uniprot_trembl} ${repository_path}/scripts/3RunningAugustus.sh
-    
-
+    mkdir -p ${P1_workingdir}
+    mkdir -p ${P1_workingdir}/log
+    mkdir -p ${P1_workingdir}/log/launch
+    export P1_1_JOBID=$(qsub -P ${PROJECT} -o ${P1_workingdir}/log/PBS/P1_1GenerateTrainingGene.OU -v repository_path=${repository_path},workingdir=${P1_workingdir},TRANSLATION_OUTPUT=${P1_TRANSLATION_OUTPUT},genome=${P1_GENOME} ${repository_path}/scripts/1GenerateTrainingGene.sh)
+    export P1_2_JOBID=$(qsub -P ${PROJECT} -W depend=afterok:${P1_1_JOBID} -o ${P1_workingdir}/log/PBS/P1_2TrainingAugustus.OU -v species=${P1_species},workingdir=${P1_workingdir},genome=${P1_GENOME} ${repository_path}/scripts/2TrainingAugustus.sh)
+    qsub -P ${PROJECT} -W depend=afterok:${P1_2_JOBID} -o ${P1_workingdir}/log/PBS/P1_3RunningAugustus.OU -v species=${P1_species},workingdir=${P1_workingdir},genome=${P1_GENOME},AUGUSTUS_CONFIG=${P1_workingdir}/Augustus/config,CUSTOM_EXTRINSIC=${repository_path}/extrinsic.MPE_modded.cfg,uniprot_sprot=${uniprot_sprot},uniprot_trembl=${uniprot_trembl} ${repository_path}/scripts/3RunningAugustus.sh
+    head -n43 "$0" > ${P1_workingdir}/log/launch/P1.launch.settings
+    exit 0
 elif [ "$P2" = "YES" ]; then
     echo -e "[LOG] \$P2 set to: YES, now launching P2"
-
-    export P2_1_JOBID=$(qsub -P ${PROJECT} -o ${workingdir}/log/PBS/P2_1GenerateTrainingGene.OU -v repository_path=${repository_path},workingdir=${P2_workingdir},TRANSLATION_OUTPUT=${P2_TRANSLATION_OUTPUT},genome=${P2_GENOME} ${repository_path}/scripts/1GenerateTrainingGene.sh)
-    if 
-
-
-
-
-    export P2workingdir="${workingdir}/P2_${P2_species}"
-    mkdir -p ${P2workingdir}
-    mkdir -p ${P2workingdir}/log
-    mkdir -p ${P2workingdir}/log/launch
-    echo -e "[LOG] Launching script 1 (GenerateTrainingGene.sh)"
-    qsub -v workingdir=${P2workingdir},uniprot_sprot=${uniprot_sprot},uniprot_trembl=${uniprot_trembl},translation_output=${P2_TRANSLATION_OUTPUT},genome=${P2_GENOME},species=${P2_species} ${repository_path}/scripts/1GenerateTrainingGene.sh
+    mkdir -p ${P2_workingdir}
+    mkdir -p ${P2_workingdir}/log
+    mkdir -p ${P2_workingdir}/log/launch
+    export P2_1_JOBID=$(qsub -P ${PROJECT} -o ${P2_workingdir}/log/PBS/P2_1GenerateTrainingGene.OU -v repository_path=${repository_path},workingdir=${P2_workingdir},TRANSLATION_OUTPUT=${P2_TRANSLATION_OUTPUT},genome=${P2_GENOME} ${repository_path}/scripts/1GenerateTrainingGene.sh)
+    if [ "$P2_DEPENDENCY_FOR_3" = "PBS_JOBID" ]; then
+        qsub -P ${PROJECT} -W depend=afterok:${P2_1_JOBID} -o ${P2_workingdir}/log/PBS/P2_3RunningAugustus.OU -v species=${P2_species},workingdir=${P2_workingdir},genome=${P2_GENOME},AUGUSTUS_CONFIG=${P2_AUGUSTUS_CONFIG},CUSTOM_EXTRINSIC=${repository_path}/extrinsic.MPE_modded.cfg,uniprot_sprot=${uniprot_sprot},uniprot_trembl=${uniprot_trembl} ${repository_path}/scripts/3RunningAugustus.sh
+    else
+        qsub -P ${PROJECT} -W depend=afterok:${P2_1_JOBID}:${P2_DEPENDENCY_FOR_3} -o ${P2_workingdir}/log/PBS/P2_3RunningAugustus.OU -v species=${P2_species},workingdir=${P2_workingdir},genome=${P2_GENOME},AUGUSTUS_CONFIG=${P2_AUGUSTUS_CONFIG},CUSTOM_EXTRINSIC=${repository_path}/extrinsic.MPE_modded.cfg,uniprot_sprot=${uniprot_sprot},uniprot_trembl=${uniprot_trembl} ${repository_path}/scripts/3RunningAugustus.sh
+    fi
+    head -n43 "$0" > ${P2_workingdir}/log/launch/P2.launch.settings
+    exit 0
 fi
 

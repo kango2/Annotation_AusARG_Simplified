@@ -1,6 +1,6 @@
 #!/bin/bash
 #PBS -N 2TrainingAugustus
-#PBS -l ncpus=32,walltime=24:00:00,storage=gdata/if89+gdata/xl04,mem=80GB,jobfs=100GB
+#PBS -l ncpus=12,walltime=16:00:00,storage=gdata/if89+gdata/xl04,mem=190GB,jobfs=10GB
 #PBS -j oe
 
 
@@ -15,7 +15,7 @@ module load AGAT/1.4.0
 module load pythonlib/3.9.2
 module load cdhit/4.8.1
 module load bedtools/2.31.0
-module load python3-as-python
+module load python3-as-python parallel/20191022
 
 export LANG=""
 export scriptdir=${repository_path}/scripts
@@ -64,32 +64,26 @@ done 2>&1 | tee >> ${workingdir}/log/filterWeaker.log
 export output=${workingdir}/TrainingGene/Workingdir/Alignment_CDS
 for i in $(ls ${workingdir}/TrainingGene/Workingdir/highQ_CDS/*.cds.highQ.fa); do
     export base=$(basename "$i" .fa)
-    minimap2 -t ${PBS_NCPUS} -ax splice:hq \
-    ${genome} \
-    ${i} | samtools sort -@ ${PBS_NCPUS} -O BAM -o ${output}/${base}_2genome.bam
+    echo -e "minimap2 -t 1 -ax splice:hq ${genome} ${i} | samtools sort -@ 1 -O BAM -o ${output}/${base}_2genome.bam" >> ${workingdir}/minimap2_command.list
 done
 export output=${workingdir}/TrainingGene/Workingdir/Alignment_cDNA
 for i in $(ls ${workingdir}/TrainingGene/Workingdir/highQ_cDNA/*.cdna.highQ.fa); do
     export base=$(basename "$i" .fa)
-    minimap2 -t ${PBS_NCPUS} -ax splice:hq \
-    ${genome} \
-    ${i} | samtools sort -@ ${PBS_NCPUS} -O BAM -o ${output}/${base}_2genome.bam
+    echo -e "minimap2 -t 1 -ax splice:hq ${genome} ${i} | samtools sort -@ 1 -O BAM -o ${output}/${base}_2genome.bam" >> ${workingdir}/minimap2_command.list
 done
 ##
 export output=${workingdir}/Hints/Workingdir/Alignment_CDS
 for i in $(ls ${workingdir}/Hints/Workingdir/weakerQ_CDS/*.cds.weakerQ.fa); do
     export base=$(basename "$i" .fa)
-    minimap2 -t ${PBS_NCPUS} -ax splice:hq \
-    ${genome} \
-    ${i} | samtools sort -@ ${PBS_NCPUS} -O BAM -o ${output}/${base}_2genome.bam
+    echo -e "minimap2 -t 1 -ax splice:hq ${genome} ${i} | samtools sort -@ 1 -O BAM -o ${output}/${base}_2genome.bam" >> ${workingdir}/minimap2_command.list
 done
 export output=${workingdir}/Hints/Workingdir/Alignment_cDNA
 for i in $(ls ${workingdir}/Hints/Workingdir/weakerQ_cDNA/*.cdna.weakerQ.fa); do
     export base=$(basename "$i" .fa)
-    minimap2 -t ${PBS_NCPUS} -ax splice:hq \
-    ${genome} \
-    ${i} | samtools sort -@ ${PBS_NCPUS} -O BAM -o ${output}/${base}_2genome.bam
+    echo -e "minimap2 -t 1 -ax splice:hq ${genome} ${i} | samtools sort -@ 1 -O BAM -o ${output}/${base}_2genome.bam" >> ${workingdir}/minimap2_command.list
 done
+cat ${workingdir}/minimap2_command.list | parallel --jobs ${PBS_NCPUS} {}
+rm ${workingdir}/minimap2_command.list
 
 
 # Convert bam to gff
