@@ -29,25 +29,23 @@ export P2="NO"                      # either "YES" or "NO", in caps
 
 # Pipeline specific settings
 ## Set these if you are running P1
-export P1_workingdir="/g/data/xl04/jc4878/workingdir"               # do not put trailing "/" at the end, this is also the output directory
+export P1_workingdir="/g/data/xl04/jc4878/workingdir"               # Do not put trailing "/" at the end, this is also the output directory
 export P1_TRANSLATION_OUTPUT="/path/to/blastxtranslation/output"    # Do not put trailing "/" at the end, this should be set to the output directory from the blastxtranslation tool
 export P1_GENOME="/path/to/genome.fasta.masked"                     # Path to your genome file, this should be the soft-masked genome file.
-export P1_species="species_name"                                    # species name, no space, can use prefixes like "TilRug" or full name "Tiliqua_rugosa"
+export P1_species="species_name"                                    # Species name, no space, can use prefixes like "TilRug" or full name "Tiliqua_rugosa"
 
 ## Set these if you are running P2
-export P2_workingdir="/g/data/xl04/jc4878/workingdir"               # do not put trailing "/" at the end, this is also the output directory
+export P2_workingdir="/g/data/xl04/jc4878/workingdir"               # Do not put trailing "/" at the end, this is also the output directory
 export P2_TRANSLATION_OUTPUT="/path/to/blastxtranslation/output"    # Do not put trailing "/" at the end, this should be set to the output directory from the blastxtranslation tool
 export P2_GENOME="/path/to/genome.fasta.masked"                     # Path to your genome file, this should be the soft-masked genome file.
-export P2_species="species_name"                                    # species name, no space, can use prefixes like "TilRug" or full name "Tiliqua_rugosa"
-export P2_AUGUSTUS_CONFIG="${P1_workingdir}/Augustus/config"        # Path to your augustus config folder, if you ran P1 previously for same species and so ${P1_workingdir} is also set above, then leave this as "${P1_workingdir}/Augustus/config", the script will automatically substitute the ${P1_workingdir} part to what you set above, you can also manually point this manually like "/path/to/Augustus/config"
+export P2_species="species_name"                                    # Species name, no space, can use prefixes like "TilRug" or full name "Tiliqua_rugosa"
+export P2_AUGUSTUS_CONFIG="${P1_workingdir}/Augustus/config"        # Path to your augustus config folder, if you ran P1 previously for same species and so ${P1_workingdir} is also set above, then leave this as "${P1_workingdir}/Augustus/config", the script will automatically substitute the ${P1_workingdir} part to what you set above, you can also point this manually like "/path/to/Augustus/config"
 export P2_DEPENDENCY_FOR_3="PBS_JOBID"                              # OPTIONAL, if this is set to anything other than "PBS_JOBID", then script3 in P2 will wait for the specified job to finish (in addition to script1) before starting. Leaving it as "PBS_JOBID" (default) will make script3 only wait for script1 to finish before starting.
 ## ^ P2_DEPENDENCY_FOR_3 is usually set to the job ID of script2 in P1 (if you are running P1 at the same time)
 
 
 # Things to note
 ## script1 now runs minimap2 in parallel, 12 concurrent jobs at any time each using 1 thread, each job have peak RSS that varies from 10GB to 15GB, we request 190GB for the job which should be enough at any one time, but if you notice any memory problem in the PBS log, then simply decrease the ncpus to 6 or 8 and this should fix the problem.
-## script1 requests 16hr walltime which should be enough even if you have hundreds of RNA samples (22 samples took ~30mins to run). But you can increase this to be safe if you have massive amount of RNA samples.
-
 
 
 
