@@ -5,12 +5,12 @@
 
 
 
-### Species name, dont use whitespace
-export species="Species_name"
-### working directory, keep same as in GenerateTrainingGene
-export workingdir="/path/to/workingdir"
-### Path to genome, keep same as in 1GenerateTrainingGene
-export genome="/g/data/xl04/jc4878/Bassiana_publication/YAHS/genome/BASDU_HifiASM_YAHS_SUP_CurV1.1.fasta.masked"
+# ### Species name, dont use whitespace
+# export species="Species_name"
+# ### working directory, keep same as in GenerateTrainingGene
+# export workingdir="/path/to/workingdir"
+# ### Path to genome, keep same as in 1GenerateTrainingGene
+# export genome="/g/data/xl04/jc4878/Bassiana_publication/YAHS/genome/BASDU_HifiASM_YAHS_SUP_CurV1.1.fasta.masked"
 
 
 cd ${workingdir}

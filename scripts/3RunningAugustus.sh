@@ -5,22 +5,22 @@
 
 
 
-### Species name, keep same as in 2TrainingAugustus.sh
-export species="Species_name"
-### working directory, keep same as in 2TrainingAugustus & 1GenerateTrainingGene
-export workingdir="/path/to/workingdir"
-### Path to genome, keep same as in 2GenerateTrainingGene & 1GenerateTrainingGene
-export genome="/g/data/xl04/jc4878/Bassiana_publication/YAHS/genome/BASDU_HifiASM_YAHS_SUP_CurV1.1.fasta.masked"
-### Path to augustus config folder
-# keep below unchanged if $workingdir is same as in 2TrainingAugustus
-# Point this to your previously trained config folder if coming from 1GenerateTrainingGene
-export AUGUSTUS_CONFIG="${workingdir}/Augustus/config"
-### Path to custom extrinsic.cfg file
-export CUSTOM_EXTRINSIC="/g/data/xl04/jc4878/github/Annotation_AusARG/extrinsic.MPE_modded.cfg"
-### Path to uniprot_swissprot diamond database
-export uniprot_sprot="/g/data/xl04/hrp561/basdurnaseq/uniprot_sprot.diamond.db.dmnd"
-### Path to uniprot_trembl diamond database
-export uniprot_trembl="/g/data/xl04/hrp561/basdurnaseq/uniprot_trembl.diamond.db.dmnd"
+# ### Species name, keep same as in 2TrainingAugustus.sh
+# export species="Species_name"
+# ### working directory, keep same as in 2TrainingAugustus & 1GenerateTrainingGene
+# export workingdir="/path/to/workingdir"
+# ### Path to genome, keep same as in 2GenerateTrainingGene & 1GenerateTrainingGene
+# export genome="/g/data/xl04/jc4878/Bassiana_publication/YAHS/genome/BASDU_HifiASM_YAHS_SUP_CurV1.1.fasta.masked"
+# ### Path to augustus config folder
+# # keep below unchanged if $workingdir is same as in 2TrainingAugustus
+# # Point this to your previously trained config folder if coming from 1GenerateTrainingGene
+# export AUGUSTUS_CONFIG="${workingdir}/Augustus/config"
+# ### Path to custom extrinsic.cfg file
+# export CUSTOM_EXTRINSIC="/g/data/xl04/jc4878/github/Annotation_AusARG/extrinsic.MPE_modded.cfg"
+# ### Path to uniprot_swissprot diamond database
+# export uniprot_sprot="/g/data/xl04/hrp561/basdurnaseq/uniprot_sprot.diamond.db.dmnd"
+# ### Path to uniprot_trembl diamond database
+# export uniprot_trembl="/g/data/xl04/hrp561/basdurnaseq/uniprot_trembl.diamond.db.dmnd"
 
 
 
